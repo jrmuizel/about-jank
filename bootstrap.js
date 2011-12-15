@@ -48,6 +48,22 @@ function appName()
 Cm.QueryInterface(Ci.nsIComponentRegistrar);
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+const HEIGHT = 18
+function graph(values, max_value) {
+  var html = ""
+  for each ([label, value] in values) {
+    var below = Math.round(HEIGHT * (value / max_value)*10)/10
+    var above = HEIGHT - below
+    html += '<div class="bar">'
+    html += '<div class="above" style="height: ' + above + 'em;"></div>'
+    html += value ? value : "&nbsp;"
+    
+    html += '<div class="below" style="height: ' + below + 'em;"></div>'
+    html += label
+    html += '</div>'
+  }
+  return html
+}
 function AboutHistograms() {}
 
 AboutHistograms.prototype = {
@@ -87,8 +103,6 @@ AboutHistograms.prototype = {
       // Prerequesite prefs aren't set
     }
 
-    html += "Sources of jank"
-
     if (enabled) {
       html += "Telemetry is enabled";
     } else {
@@ -100,6 +114,15 @@ AboutHistograms.prototype = {
     const Telemetry = Cc["@mozilla.org/base/telemetry;1"].getService(Ci.nsITelemetry)
 
     var h = Telemetry.histogramSnapshots;
+    if ("slowSQLOnMain" in h) {
+      html += this.getSlowSqlTable(h.slowSQLOnMain, h.slowSQLStatsMain, true);
+      html += this.getSlowSqlTable(h.slowSQLOnOther, h.slowSQLStatsOther, false);
+      html += "\n<hr>\n"
+      delete h.slowSQLOnMain;
+      delete h.slowSQLStatsMain;
+      delete h.slowSQLOnOther;
+      delete h.slowSQLStatsOther;
+    }
 
     for (var key in h) {
       var v = h[key]
@@ -133,6 +156,7 @@ AboutHistograms.prototype = {
       if (last && last < buckets.length) {
         values.push([buckets[last],0])
       }
+      html += graph(values, max_value)
       html +="</div>\n"
     }
     html += "</body></html>";
