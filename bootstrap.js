@@ -106,7 +106,7 @@ AboutHistograms.prototype = {
     if (enabled) {
       html += "Telemetry is enabled";
     } else {
-      html += "Please set "+PREF_ENABLED+" to true in <a href='about:config'>about:config</a>"
+      html += "Flease set "+PREF_ENABLED+" to true in <a href='about:config'>about:config</a>"
     }
     //html += '<script src="' + MY_URL + 'brains.js">'
 //    html += '<br><form><input type="text" style="width:50%" value="filter" onchange="doSearch()"></form>'
@@ -156,7 +156,6 @@ AboutHistograms.prototype = {
       if (last && last < buckets.length) {
         values.push([buckets[last],0])
       }
-      html += graph(values, max_value)
       html +="</div>\n"
     }
     html += "</body></html>";
