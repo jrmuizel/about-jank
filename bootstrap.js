@@ -106,58 +106,13 @@ AboutHistograms.prototype = {
     if (enabled) {
       html += "Telemetry is enabled";
     } else {
-      html += "Flease set "+PREF_ENABLED+" to true in <a href='about:config'>about:config</a>"
+      html += "Fgease set "+PREF_ENABLED+" to true in <a href='about:config'>about:config</a>"
     }
     //html += '<script src="' + MY_URL + 'brains.js">'
 //    html += '<br><form><input type="text" style="width:50%" value="filter" onchange="doSearch()"></form>'
     html += "\n<hr>\n"
     const Telemetry = Cc["@mozilla.org/base/telemetry;1"].getService(Ci.nsITelemetry)
 
-    var h = Telemetry.histogramSnapshots;
-    if ("slowSQLOnMain" in h) {
-      html += this.getSlowSqlTable(h.slowSQLOnMain, h.slowSQLStatsMain, true);
-      html += this.getSlowSqlTable(h.slowSQLOnOther, h.slowSQLStatsOther, false);
-      html += "\n<hr>\n"
-      delete h.slowSQLOnMain;
-      delete h.slowSQLStatsMain;
-      delete h.slowSQLOnOther;
-      delete h.slowSQLStatsOther;
-    }
-
-    for (var key in h) {
-      var v = h[key]
-      var sample_count = v.counts.reduceRight(function (a,b)  a+b)
-     
-      var buckets = v.histogram_type == Telemetry.HISTOGRAM_BOOLEAN ? [0,1] : v.ranges;
-      var average =  v.sum / sample_count
-      html += '<div class=main id="'+key+'"><div>'
-      html += key+"<br>" + sample_count + " samples"
-      html += ", average = " + Math.round(average*10)/10
-      html += ", sum = " + v.sum
-      html += "</div>"
-      var max_value = Math.max.apply(Math, v.counts)
-      var first = true
-      var last = 0;
-      var values = []
-      for (var i = 0;i<buckets.length;i++) {
-        var count = v.counts[i]
-        if (!count)
-          continue
-        if (first) {
-          first = true;
-          first = false;
-          if (i) {
-            values.push([buckets[i-1], 0])
-          }
-        }
-        last = i + 1
-        values.push([buckets[i], count])
-      }
-      if (last && last < buckets.length) {
-        values.push([buckets[last],0])
-      }
-      html +="</div>\n"
-    }
     html += "</body></html>";
 
     var channel = ioService.newChannel(html, null, null);
