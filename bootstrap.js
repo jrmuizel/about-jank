@@ -139,7 +139,7 @@ AboutHistograms.prototype = {
     	if (results[i] in summary) {
 		summary[results[i]] += 1;
 	} else {
-		summary[results[i]] = 0;
+		summary[results[i]] = 1;
 	}
     }
     sorted = [];
