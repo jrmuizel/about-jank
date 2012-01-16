@@ -103,8 +103,6 @@ AboutHistograms.prototype = {
     }
     var result = profiler.GetProfile();
     dump(result);
-    html += "about:jank results";
-    html += "\n<hr>\n"
     var raw_results = result.split("\n");
     var i = 0;
     var results = []
@@ -122,6 +120,8 @@ AboutHistograms.prototype = {
 	last = raw_results[i];
     	i++;
     }
+    html += "about:jank results (" + results.length + " samples)";
+    html += "\n<hr>\n"
     var summary = {};
     for (var i=0; i<results.length; i++) {
     	if (results[i] in summary) {
