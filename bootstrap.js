@@ -4,7 +4,6 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 const Cm = Components.manager;
-const PREF_ENABLED = "toolkit.telemetry.enabled";
 
 Cm.QueryInterface(Ci.nsIComponentRegistrar);
 
@@ -100,22 +99,11 @@ AboutHistograms.prototype = {
 	       
     var profiler = Cc["@mozilla.org/tools/profiler;1"].getService(Ci.nsIProfiler);
     if (!profiler.IsActive()) {
-        profiler.StartProfiler(100000, 10);
+        profiler.StartProfiler(100000, 10, ['jank'], 1);
     }
     var result = profiler.GetProfile();
     dump(result);
-    var enabled = false;
-    try {
-      enabled = Services.prefs.getBoolPref(PREF_ENABLED);
-    } catch (e) {
-      // Prerequesite prefs aren't set
-    }
-
-    if (enabled) {
-      html += "Telemetry is enabled";
-    } else {
-      html += "Fgease set "+PREF_ENABLED+" to true in <a href='about:config'>about:config</a>"
-    }
+    html += "about:jank results";
     html += "\n<hr>\n"
     var raw_results = result.split("\n");
     var i = 0;
