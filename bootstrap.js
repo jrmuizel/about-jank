@@ -48,46 +48,13 @@ Cm.QueryInterface(Ci.nsIComponentRegistrar);
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 const HEIGHT = 18
-function graph(values, max_value) {
-  var html = ""
-  for each ([label, value] in values) {
-    var below = Math.round(HEIGHT * (value / max_value)*10)/10
-    var above = HEIGHT - below
-    html += '<div class="bar">'
-    html += '<div class="above" style="height: ' + above + 'em;"></div>'
-    html += value ? value : "&nbsp;"
-    
-    html += '<div class="below" style="height: ' + below + 'em;"></div>'
-    html += label
-    html += '</div>'
-  }
-  return html
-}
-function AboutHistograms() {}
+function AboutJank() {}
 
-AboutHistograms.prototype = {
+AboutJank.prototype = {
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIAboutModule]),
   classDescription: "about:jank",
   classID: Components.ID("{cac9f560-2747-11e1-bfc2-0800200c9a66}"),
   contractID: "@mozilla.org/network/protocol/about;1?what=jank",
-
-  getSlowSqlTable: function(queries, stats, isMainThread) {
-    if (Object.keys(queries).length == 0) {
-      return "";
-    }
-    var listHtml = '\n<br><table class=slowSql id="' + (isMainThread ? 'main' : 'other') + 'SqlTable">';
-    listHtml += '\n<caption>Slow SQL Statements on ' + (isMainThread ? 'Main' : 'Other') + ' Thread</caption>';
-    listHtml += '\n<tr><th>Hits</th><th>Total Time (ms)</th><th>Statement</th></tr>';
-    for (var key in queries) {
-      listHtml += '\n<tr>';
-      listHtml += '<td>' + stats[key][0] + '</td>';
-      listHtml += '<td>' + stats[key][1] + '</td>';
-      listHtml += '<td>' + queries[key] + '</td>';
-      listHtml += '</tr>';
-    }
-    listHtml += '\n</table>';
-    return listHtml;
-  },
 
   newChannel: function(uri)
   {
@@ -120,8 +87,9 @@ AboutHistograms.prototype = {
 	last = raw_results[i];
     	i++;
     }
-    html += "about:jank results (" + results.length + " samples)";
-    html += "\n<hr>\n"
+    html += "records samples that occured in during periods when we did not service the event loop for more than > 100 ms.<br> NOTE: about:jank doesn't interact well with the Gecko Profiler Addon<br>";
+    html += "about:jank results (" + results.length + " samples)<br>";
+    html += "\n<hr>\n";
     var summary = {};
     for (var i=0; i<results.length; i++) {
     	if (results[i] in summary) {
@@ -158,7 +126,7 @@ AboutHistograms.prototype = {
   }
 }
 
-const AboutHistogramsFactory = XPCOMUtils.generateNSGetFactory([AboutHistograms])(AboutHistograms.prototype.classID);
+const AboutJankFactory = XPCOMUtils.generateNSGetFactory([AboutJank])(AboutJank.prototype.classID);
 
 var global = this;
 
@@ -174,11 +142,11 @@ function monkeyPatchWindow(w, loadedAlready) {
     menuitem.addEventListener("command", function () {
       w.document.getElementById("tabmail").openTab(
         "contentTab",
-        { contentPage: "about:telemetry" }
+        { contentPage: "about:jank" }
       );
     }, false);
-    menuitem.setAttribute("label", "about:telemetry");
-    menuitem.setAttribute("id", "aboutTelemetryMenuitem");
+    menuitem.setAttribute("label", "about:jank");
+    menuitem.setAttribute("id", "aboutJankMenuitem");
     taskPopup.appendChild(menuitem);
   };
   if (loadedAlready)
@@ -188,7 +156,7 @@ function monkeyPatchWindow(w, loadedAlready) {
 }
 
 function unMonkeyPatchWindow(w) {
-  let menuitem = w.document.getElementById("aboutTelemetryMenuitem");
+  let menuitem = w.document.getElementById("aboutJankMenuitem");
   menuitem.parentNode.removeChild(menuitem);
 }
 
@@ -226,10 +194,10 @@ function startup(aData, aReason) {
   }
 
   // This throws when doing disable/enable, so leave it at the end...
-  Cm.registerFactory(AboutHistograms.prototype.classID,
-                     AboutHistograms.prototype.classDescription,
-                     AboutHistograms.prototype.contractID,
-                     AboutHistogramsFactory);
+  Cm.registerFactory(AboutJank.prototype.classID,
+                     AboutJank.prototype.classDescription,
+                     AboutJank.prototype.contractID,
+                     AboutJankFactory);
 }
 
 function shutdown(aData, aReason) {
