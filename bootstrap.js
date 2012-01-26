@@ -160,7 +160,7 @@ function startup(aData, aReason) {
   let alias = Services.io.newFileURI(aData.installPath);
   if (!aData.installPath.isDirectory())
     alias = Services.io.newURI("jar:" + alias.spec + "!/", null, null);
-  resource.setSubstitution("telemetry-addon", alias);
+  resource.setSubstitution("jank-addon", alias);
 
   // For Thunderbird, since there's no URL bar, we add a menu item to make it
   // more discoverable.
@@ -197,7 +197,7 @@ function shutdown(aData, aReason) {
   if (aReason == APP_SHUTDOWN) return;
 
   let resource = Services.io.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
-  resource.setSubstitution("telemetry-addon", null);
+  resource.setSubstitution("jank-addon", null);
 
   Cm.unregisterFactory(AboutJank.prototype.classID, AboutJankFactory);
 
