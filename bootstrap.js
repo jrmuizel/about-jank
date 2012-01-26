@@ -66,7 +66,7 @@ AboutJank.prototype = {
 	       
     var profiler = Cc["@mozilla.org/tools/profiler;1"].getService(Ci.nsIProfiler);
     if (!profiler.IsActive()) {
-        profiler.StartProfiler(100000, 10, ['jank'], 1);
+        profiler.StartProfiler(100000, 5, ['jank'], 1);
     }
     var result = profiler.GetProfile();
     dump(result);
