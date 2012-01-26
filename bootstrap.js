@@ -1,5 +1,3 @@
-Components.utils.import("resource://gre/modules/Services.jsm");
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
@@ -43,10 +41,6 @@ function appName()
   throw new Error("appName: UNSUPPORTED APPLICATION UUID");
 }
 
-
-Cm.QueryInterface(Ci.nsIComponentRegistrar);
-
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 const HEIGHT = 18
 function AboutJank() {}
 
@@ -56,66 +50,65 @@ AboutJank.prototype = {
   classID: Components.ID("{cac9f560-2747-11e1-bfc2-0800200c9a66}"),
   contractID: "@mozilla.org/network/protocol/about;1?what=jank",
 
-  newChannel: function(uri)
-  {
-  try {
-    var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-    var html = 'data:text/html,<html><head>' 
-               + '<LINK href="' + MY_URL + 'stylesheet.css" rel="stylesheet" type="text/css">'
-               + '</head><body>';
-	       
-    var profiler = Cc["@mozilla.org/tools/profiler;1"].getService(Ci.nsIProfiler);
-    if (!profiler.IsActive()) {
-        profiler.StartProfiler(100000, 5, ['jank'], 1);
-    }
-    var result = profiler.GetProfile();
-    dump(result);
-    var raw_results = result.split("\n");
-    var i = 0;
-    var results = []
-    var state = "start";
-    var last = "";
-    while (i < raw_results.length) {
-    	if (raw_results[i].charAt(0) == 's') {
-	    if (state == "call") {
-	    	results.push(last);
-	    }
-	    state = "start";
-	} else {
-	    state = "call";
-	}
-	last = raw_results[i];
-    	i++;
-    }
-    html += "records samples that occured in during periods when we did not service the event loop for more than > 100 ms.<br> NOTE: about:jank doesn't interact well with the Gecko Profiler Addon<br>";
-    html += "about:jank results (" + results.length + " samples)<br>";
-    html += "\n<hr>\n";
-    var summary = {};
-    for (var i=0; i<results.length; i++) {
-    	if (results[i] in summary) {
-		summary[results[i]] += 1;
-	} else {
-		summary[results[i]] = 1;
-	}
-    }
-    sorted = [];
-    for (var key in summary) sorted.push([key,summary[key]]);
-    sorted.sort(function(a,b) { return b[1]-a[1]; });
-    results = "";
-    for (var i=0; i<sorted.length; i++) {
-    	results += sorted[i][1] + " - " + sorted[i][0] + "\n";
-    }
-
-    html += "<pre>" + escape(results) + "</pre>";
-    html += "</body></html>";
-
-    var channel = ioService.newChannel(html, null, null);
-    var securityManager = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
-    var principal = securityManager.getCodebasePrincipal(uri);
-    channel.originalURI = uri;
-    channel.owner = principal;
+  newChannel: function(uri) {
+    try {
+      var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+      var html = 'data:text/html,<html><head>' 
+                 + '<LINK href="' + MY_URL + 'stylesheet.css" rel="stylesheet" type="text/css">'
+                 + '</head><body>';
+  
+      var profiler = Cc["@mozilla.org/tools/profiler;1"].getService(Ci.nsIProfiler);
+      if (!profiler.IsActive()) {
+          profiler.StartProfiler(100000, 5, ['jank'], 1);
+      }
+      var result = profiler.GetProfile();
+      dump(result);
+      var raw_results = result.split("\n");
+      var i = 0;
+      var results = []
+      var state = "start";
+      var last = "";
+      while (i < raw_results.length) {
+        if (raw_results[i].charAt(0) == 's') {
+          if (state == "call") {
+            results.push(last);
+          }
+          state = "start";
+        } else {
+          state = "call";
+        }
+        last = raw_results[i];
+        i++;
+      }
+      html += "records samples that occured in during periods when we did not service the event loop for more than > 100 ms.<br> NOTE: about:jank doesn't interact well with the Gecko Profiler Addon<br>";
+      html += "about:jank results (" + results.length + " samples)<br>";
+      html += "\n<hr>\n";
+      var summary = {};
+      for (var i=0; i<results.length; i++) {
+        if (results[i] in summary) {
+          summary[results[i]] += 1;
+        } else {
+          summary[results[i]] = 1;
+        }
+      }
+      sorted = [];
+      for (var key in summary) sorted.push([key,summary[key]]);
+      sorted.sort(function(a,b) { return b[1]-a[1]; });
+      results = "";
+      for (var i=0; i<sorted.length; i++) {
+        results += sorted[i][1] + " - " + sorted[i][0] + "\n";
+      }
+  
+      html += "<pre>" + escape(results) + "</pre>";
+      html += "</body></html>";
+  
+      var channel = ioService.newChannel(html, null, null);
+      var securityManager = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
+      var principal = securityManager.getCodebasePrincipal(uri);
+      channel.originalURI = uri;
+      channel.owner = principal;
     } catch (e) {
-    dump(e);
+      dump(e);
     }
     return channel;
   },
@@ -205,6 +198,8 @@ function shutdown(aData, aReason) {
 
   let resource = Services.io.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
   resource.setSubstitution("telemetry-addon", null);
+
+  Cm.unregisterFactory(AboutJank.prototype.classID, AboutJankFactory);
 
   if (appName() == "THUNDERBIRD") {
     // Un-patch all existing windows
