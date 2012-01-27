@@ -1,10 +1,16 @@
+<!-- vim: set et sw=2: -->
 <script>
+      function escapeHTML(s) {
+        return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
       const Cc = Components.classes;
       const Ci = Components.interfaces;
       const Cu = Components.utils;
       const Cm = Components.manager;
 
       const MY_URL = "resource://jank-addon/";
+            
       var html = '<html><head>' 
                  + '<LINK href="' + MY_URL + 'stylesheet.css" rel="stylesheet" type="text/css">'
                  + '</head><body>';
@@ -48,7 +54,7 @@
       sorted.sort(function(a,b) { return b[1]-a[1]; });
       results = "";
       for (var i=0; i<sorted.length; i++) {
-        results += sorted[i][1] + " - " + sorted[i][0] + "\n";
+        results += sorted[i][1] + " - " + escapeHTML(sorted[i][0]) + "\n";
       }
   
       html += "<pre>" + results + "</pre>";
