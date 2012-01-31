@@ -55,7 +55,7 @@ AboutJank.prototype = {
       var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
       var channel = ioService.newChannel(MY_URL + 'aboutjank.html', null, null);
       var securityManager = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
-      var principal = securityManager.getSystemPrincipal(uri);
+      var principal = securityManager.getSystemPrincipal();
       channel.originalURI = uri;
       channel.owner = principal;
     } catch (e) {
