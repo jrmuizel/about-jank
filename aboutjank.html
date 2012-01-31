@@ -10,6 +10,7 @@
       const Cm = Components.manager;
 
       const MY_URL = "resource://jank-addon/";
+      var intervalMS = 5;
             
       var html = '<html><head>' 
                  + '<LINK href="' + MY_URL + 'stylesheet.css" rel="stylesheet" type="text/css">'
@@ -17,7 +18,7 @@
   
       var profiler = Cc["@mozilla.org/tools/profiler;1"].getService(Ci.nsIProfiler);
       if (!profiler.IsActive()) {
-          profiler.StartProfiler(100000, 5, ['jank'], 1);
+          profiler.StartProfiler(100000, intervalMS, ['jank'], 1);
       }
       var result = profiler.GetProfile();
       dump(result);
